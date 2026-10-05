@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import "./App.css";
 
-const API = "http://localhost:3001/api/tasks";
+const API = "/api/tasks";
 
 async function request(path = "", options = {}) {
   const response = await fetch(`${API}${path}`, options);
@@ -132,3 +132,4 @@ export default function App() {
     </main>
   );
 }
+
