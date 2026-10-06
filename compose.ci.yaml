@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: taskflow
+      POSTGRES_USER: taskflow_user
+      POSTGRES_PASSWORD: ci-test-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskflow_user -d taskflow"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  api:
+    image: taskflow-api:ci
+    environment:
+      PORT: "3000"
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: taskflow
+      PGUSER: taskflow_user
+      PGPASSWORD: ci-test-only
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  web:
+    image: taskflow-web:ci
+    depends_on:
+      api:
+        condition: service_healthy
